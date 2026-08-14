@@ -111,6 +111,13 @@ def read_excel_data():
             "current_action": ws2.cell(r, 10).value or ""
         })
 
+    # --- 已合作人数：自动从明细表统计（状态=已合作 或 已确认合作），不再依赖手动填写的 B24 ---
+    coop_statuses = ("已合作", "已确认合作")
+    auto_coop = sum(1 for inf in influencers if inf["status"] in coop_statuses)
+    kpi_summary["total_coop"] = auto_coop
+    reach = kpi_summary.get("total_reach") or 0
+    kpi_summary["coop_rate"] = round(auto_coop / reach * 100, 1) if reach else 0.0
+
     return {
         "weekly_data": weekly_data,
         "weekly_total": weekly_total,
@@ -292,6 +299,7 @@ tr:hover td {{ background: var(--gray-50); }}
 .status-报价协商中 {{ background: #fef3c7; color: #b45309; }}
 .status-已拒绝 {{ background: #fee2e2; color: #dc2626; }}
 .status-已确认合作 {{ background: #d1fae5; color: #059669; }}
+.status-已合作 {{ background: #d1fae5; color: #059669; }}
 .status-新建联 {{ background: #e0e7ff; color: #4338ca; }}
 .status-报价中 {{ background: #fce7f3; color: #be185d; }}
 .status-已失效 {{ background: #f3f4f6; color: #6b7280; }}
@@ -488,10 +496,11 @@ const STATUS_COLORS = {{
   '报价中': '#be185d',
   '报价协商中': '#b45309',
   '已确认合作': '#059669',
+  '已合作': '#059669',
   '已拒绝': '#dc2626',
   '已失效': '#6b7280'
 }};
-const STATUS_ORDER = ['新建联','沟通中','报价中','报价协商中','已确认合作','已拒绝','已失效'];
+const STATUS_ORDER = ['新建联','沟通中','报价中','报价协商中','已合作','已确认合作','已拒绝','已失效'];
 
 // --- 1. Weekly Chart ---
 const weeks = DATA.weekly_data.map(d => d.week.replace(/第|周.*/g,'').trim());
